@@ -1,0 +1,35 @@
+FROM php:8.4-fpm
+
+RUN apt-get update && apt-get install -y \
+    git \
+    unzip \
+    libonig-dev \
+    libzip-dev \
+    libpng-dev \
+    && docker-php-ext-install \
+    pdo pdo_mysql mbstring \
+    zip \
+    gd \
+    bcmath
+
+COPY --from=composer:2.9 /usr/bin/composer /usr/bin/composer
+
+COPY docker-entrypoint.sh /usr/local/bin/
+
+WORKDIR /var/www/html
+
+COPY composer*.json ./
+
+RUN composer install --no-interaction --no-scripts --no-autoloader
+
+COPY . .
+
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+RUN composer dump-autoload --optimize
+
+ENTRYPOINT [ "docker-entrypoint.sh" ]
+
+EXPOSE 9000
+
+CMD ["php-fpm"]
