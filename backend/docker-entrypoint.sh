@@ -13,4 +13,4 @@ done
 echo "Running migration"
 php artisan migrate --force
 
-exec php-fpm
+exec "$@"
